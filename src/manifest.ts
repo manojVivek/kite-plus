@@ -21,6 +21,11 @@ export default defineManifest({
       matches: ['https://kite.zerodha.com/*'],
       js: ['src/contentScript/index.ts'],
     },
+    {
+      matches: ['https://console.zerodha.com/*'],
+      all_frames: true,
+      js: ['src/contentScript/console/index.ts'],
+    },
   ],
   web_accessible_resources: [
     {
@@ -28,4 +33,6 @@ export default defineManifest({
       matches: [],
     },
   ],
+  permissions: ['declarativeNetRequest', 'declarativeNetRequestFeedback'],
+  host_permissions: ['https://console.zerodha.com/*', 'https://kite.zerodha.com/*'],
 });
