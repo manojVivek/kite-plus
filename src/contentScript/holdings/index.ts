@@ -17,7 +17,12 @@ export class Holdings {
 
   constructor() {
     (async () => {
+      const result = await chrome.storage.sync.get(['xirrEnabled']);
+      if (result.xirrEnabled !== undefined && !Boolean(result.xirrEnabled)) {
+        return;
+      }
       this.initHoldings(await this.fetchPortfolioReport());
+
     })();
   }
 

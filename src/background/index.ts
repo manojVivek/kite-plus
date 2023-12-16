@@ -13,10 +13,6 @@ chrome.runtime.onInstalled.addListener(() => {
     id: 1,
     priority: 1,
     condition: {
-      //urlFilter: 'https://console.zerodha.com/*',
-      // initiatorDomains: ['https://kite.zerodha.com'],
-      // requestDomains: ['https://console.zerodha.com'],
-      // resourceTypes: allResourceTypes,
       urlFilter: 'https://console.zerodha.com/api/reports/*',
     },
     action: {
@@ -59,11 +55,9 @@ chrome.runtime.onInstalled.addListener(() => {
     removeRuleIds: [RULE.id],
     addRules: [RULE],
   });
-  console.log('Added declarativeNetRequest rule');
 
   chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(details => {
     console.log('onRuleMatchedDebug', details);
   });
 
-  console.log('Added declarativeNetRequest listener');
 });

@@ -16,23 +16,23 @@ export default defineManifest({
     service_worker: 'src/background/index.ts',
     type: 'module',
   },
+  action: {
+    default_popup: 'options.html',
+    default_icon: 'img/logo-48.png',
+  },
   content_scripts: [
     {
       matches: ['https://kite.zerodha.com/*'],
       js: ['src/contentScript/index.ts'],
     },
-    {
-      matches: ['https://console.zerodha.com/*'],
-      all_frames: true,
-      js: ['src/contentScript/console/index.ts'],
-    },
   ],
+  options_page: 'options.html',
   web_accessible_resources: [
     {
       resources: ['img/logo-16.png', 'img/logo-34.png', 'img/logo-48.png', 'img/logo-128.png'],
       matches: [],
     },
   ],
-  permissions: ['declarativeNetRequest', 'declarativeNetRequestFeedback'],
+  permissions: ['declarativeNetRequest', 'declarativeNetRequestFeedback', 'storage'],
   host_permissions: ['https://console.zerodha.com/*', 'https://kite.zerodha.com/*'],
 });
