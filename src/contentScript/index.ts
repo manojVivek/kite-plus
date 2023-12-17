@@ -26,15 +26,3 @@ const run = () => {
 };
 
 run();
-
-const addiFrame = () => {
-  const iframe = document.createElement('iframe');
-  iframe.src =
-    'https://console.zerodha.com/portfolio/holdings?segment=EQ&isin=INE470A01017&tradingsymbol=3MINDIA&src=kiteweb';
-  iframe.width = '100%';
-  iframe.height = '60%';
-  // Append to start of doc
-  document.documentElement.prepend(iframe);
-};
-
-//addiFrame();

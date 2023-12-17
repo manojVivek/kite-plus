@@ -2,13 +2,13 @@ import {z} from 'zod';
 import pLimit from 'p-limit';
 import {Xirr} from './xirr';
 
-const Instrument = z.object({
+const InstrumentZod = z.object({
   tradingsymbol: z.string(),
   instrument_id: z.string(),
   xirr: z.number().or(z.literal('NA')).optional(),
 });
 
-type Instrument = z.infer<typeof Instrument>;
+type Instrument = z.infer<typeof InstrumentZod>;
 
 export class Holdings {
   holdingsMap: Record<string, Instrument> = {};
@@ -21,9 +21,24 @@ export class Holdings {
       if (result.xirrEnabled !== undefined && !Boolean(result.xirrEnabled)) {
         return;
       }
-      this.initHoldings(await this.fetchPortfolioReport());
 
+      await this.initHoldings(await this.fetchPortfolioReport());
+
+      this.setUpLocationChangeListener();
+      console.log('location change listener added');
     })();
+  }
+
+  setUpLocationChangeListener() {
+    // Improve this
+    let lastURL = document.location.href;
+
+    setInterval(() => {
+      if (lastURL !== document.location.href) {
+        this.refreshPageData();
+        lastURL = document.location.href;
+      }
+    }, 1000);
   }
 
   isHoldingsPage() {
@@ -39,12 +54,18 @@ export class Holdings {
   }
 
   updateXirr = async () => {
+    console.log('Updating xirr');
     const table = document.querySelector('.holdings-table table');
     if (table == null) {
       return;
     }
-    const header = table.children[0];
-    header.children[0].insertAdjacentHTML('beforeend', '<th>XIRR</th>');
+    const header = table.children[0].children[0];
+    for (const row of header.children) {
+      if (row.textContent?.trim() === 'XIRR') {
+        return;
+      }
+    }
+    header.insertAdjacentHTML('beforeend', '<th>XIRR</th>');
     const rows = table.children[1].children;
     for (const row of rows) {
       const tradingsymbol = row.children[0].textContent?.trim();
@@ -73,7 +94,7 @@ export class Holdings {
   };
 
   initHoldings = async (data: any) => {
-    const holdings = z.array(Instrument).parse(data);
+    const holdings = z.array(InstrumentZod).parse(data);
     this.holdingsMap = holdings.reduce(
       (acc, item) => {
         acc[item.tradingsymbol] = item;
@@ -82,6 +103,7 @@ export class Holdings {
       {} as Record<string, Instrument>
     );
     await this.enrichHoldingsWithXirr();
+    console.log('holdingsMap', this.holdingsMap);
     this.refreshPageData();
   };
 
@@ -94,15 +116,17 @@ export class Holdings {
     }
   };
 
-  fetchPortfolioReport = async () => {
+  fetchPortfolioReport = async (retrying = false): Promise<Instrument[]> => {
     const token = window.localStorage.getItem('__storejs_kite_public_token');
     if (token == null) {
       console.log('console token is null');
-      return;
+      return [];
     }
     try {
-      const {data} = await fetch(
-        `https://console.zerodha.com/api/reports/holdings/portfolio?date=2023-12-15`,
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+      const res = await fetch(
+        `https://console.zerodha.com/api/reports/holdings/portfolio?date=${dateStr}`,
         {
           headers: {
             'X-Csrftoken': token.replaceAll('"', ''),
@@ -111,9 +135,30 @@ export class Holdings {
           credentials: 'include',
         }
       ).then(res => res.json());
+      if (res.status === 'error' && res.error_type === 'TokenException') {
+        if (retrying) {
+          return [];
+        }
+        await this.loadConsoleIframe();
+        return this.fetchPortfolioReport(true);
+      }
+      const {data} = res;
       return data.result.eq;
     } catch (e) {
       console.log('error', e);
     }
+    return [];
+  };
+
+  loadConsoleIframe = async () => {
+    const iframe = document.createElement('iframe');
+    iframe.src = 'https://console.zerodha.com/portfolio/holdings';
+    iframe.width = '100%';
+    iframe.height = '60%';
+    iframe.style.display = 'none';
+    // Append to start of doc
+    document.documentElement.prepend(iframe);
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    iframe.remove();
   };
 }
