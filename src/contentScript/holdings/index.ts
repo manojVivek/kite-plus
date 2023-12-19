@@ -16,15 +16,14 @@ export class Holdings {
   xirrFetcher = new Xirr();
 
   constructor() {
+    this.setUpOnHoverFundamentals();
     (async () => {
       const result = await chrome.storage.sync.get(['xirrEnabled']);
-      if (result.xirrEnabled !== undefined && !Boolean(result.xirrEnabled)) {
-        return;
+      if (result.xirrEnabled === undefined || Boolean(result.xirrEnabled)) {
+        await this.initHoldings(await this.fetchPortfolioReport());
       }
-
-      await this.initHoldings(await this.fetchPortfolioReport());
-
       this.setUpLocationChangeListener();
+      this.refreshPageData();
       console.log('location change listener added');
     })();
   }
@@ -52,6 +51,52 @@ export class Holdings {
 
     this.updateXirr();
   }
+
+  setUpOnHoverFundamentals = () => {
+    let activeTicker = '';
+    document.addEventListener('mouseover', async (e: any) => {
+      if (!(e.target.tagName === 'SPAN' || e.target.tagName === 'TD')) {
+        return;
+      }
+      const target = e.target as HTMLElement;
+      const ticker = target.textContent?.trim();
+      // check if context is all caps and alphabetical
+      if (
+        ticker == '' ||
+        ticker == null ||
+        ticker !== ticker.toUpperCase() ||
+        !/^[A-Z]+$/.test(ticker) ||
+        ticker === activeTicker
+      ) {
+        return;
+      }
+      activeTicker = ticker;
+
+      const iframe = document.createElement('iframe');
+      const addIFrame = () => {
+        iframe.src = `https://stocks.tickertape.in/tickers/${ticker}`;
+        iframe.width = '715px';
+        iframe.height = '400px';
+        iframe.style.position = 'fixed';
+        iframe.style.bottom = '0';
+        iframe.style.right = '0';
+        iframe.style.zIndex = '999';
+        iframe.style.border = 'none';
+        iframe.style.background = 'white';
+        iframe.style.boxShadow = '0 0 5px 0px #0000004d';
+
+        document.querySelector('#app')?.append(iframe);
+      };
+
+      const handle = setTimeout(addIFrame, 250);
+
+      target.addEventListener('mouseleave', () => {
+        clearTimeout(handle);
+        activeTicker = '';
+        iframe.remove();
+      });
+    });
+  };
 
   updateXirr = async () => {
     console.log('Updating xirr');
@@ -104,7 +149,6 @@ export class Holdings {
     );
     await this.enrichHoldingsWithXirr();
     console.log('holdingsMap', this.holdingsMap);
-    this.refreshPageData();
   };
 
   enrichHoldingsWithXirr = async () => {

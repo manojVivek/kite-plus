@@ -33,6 +33,6 @@ export default defineManifest({
       matches: [],
     },
   ],
-  permissions: ['declarativeNetRequest', 'declarativeNetRequestFeedback', 'storage'],
+  permissions: ['declarativeNetRequest', 'storage'],
   host_permissions: ['https://console.zerodha.com/*', 'https://kite.zerodha.com/*'],
 });
