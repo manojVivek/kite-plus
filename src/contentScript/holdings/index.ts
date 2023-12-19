@@ -54,7 +54,20 @@ export class Holdings {
 
   setUpOnHoverFundamentals = () => {
     let activeTicker = '';
+    let hoverFundamentalsEnabled = false;
+    chrome.storage.sync.get(['hoverFundamentalsEnabled'], result => {
+      hoverFundamentalsEnabled = result.hoverFundamentalsEnabled ?? true;
+    });
+    chrome.storage.sync.onChanged.addListener(changes => {
+      if (changes.hoverFundamentalsEnabled) {
+        hoverFundamentalsEnabled = changes.hoverFundamentalsEnabled.newValue;
+      }
+    });
+
     document.addEventListener('mouseover', async (e: any) => {
+      if (!hoverFundamentalsEnabled) {
+        return;
+      }
       if (!(e.target.tagName === 'SPAN' || e.target.tagName === 'TD')) {
         return;
       }
@@ -88,7 +101,7 @@ export class Holdings {
         document.querySelector('#app')?.append(iframe);
       };
 
-      const handle = setTimeout(addIFrame, 250);
+      const handle = setTimeout(addIFrame, 200);
 
       target.addEventListener('mouseleave', () => {
         clearTimeout(handle);

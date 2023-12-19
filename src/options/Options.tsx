@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 
 export const Options = () => {
   const [xirrEnabled, setXirrEnabled] = useState(true);
+  const [hoverFundamentalsEnabled, setHoverFundamentalsEnabled] = useState(true);
 
   useEffect(() => {
     chrome.storage.sync.get(['xirrEnabled'], result => {
@@ -17,11 +18,11 @@ export const Options = () => {
       </div>
 
       <div>
-        <h2 className="text-lg">Preferences</h2>
-        <div className="flex flex-col gap-4">
+        <h2 className="text-lg mb-4">Preferences</h2>
+        <div className="flex flex-col gap-2">
           <div className="flex gap-2">
             <input
-              id="count"
+              id="xirrEnabled"
               type="checkbox"
               checked={xirrEnabled}
               onChange={e => {
@@ -29,7 +30,21 @@ export const Options = () => {
                 chrome.storage.sync.set({xirrEnabled: e.target.checked});
               }}
             />
-            <label htmlFor="count">XIRR field</label>
+            <label htmlFor="xirrEnabled">XIRR field</label>
+          </div>
+          <div className="flex gap-2">
+            <input
+              id="onHoverFundamentals"
+              type="checkbox"
+              checked={hoverFundamentalsEnabled}
+              onChange={e => {
+                setHoverFundamentalsEnabled(e.target.checked);
+                chrome.storage.sync.set({hoverFundamentalsEnabled: e.target.checked});
+              }}
+            />
+            <label htmlFor="onHoverFundamentals">
+              Show Fundamentals on mouse over a Ticker symbol
+            </label>
           </div>
         </div>
       </div>
