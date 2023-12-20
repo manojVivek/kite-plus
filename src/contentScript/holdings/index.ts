@@ -1,20 +1,15 @@
 import {z} from 'zod';
-import pLimit from 'p-limit';
-import {Xirr} from './xirr';
 import {setUpOnHoverFundamentals} from './hoverFundamentals';
-
-const InstrumentZod = z.object({
-  tradingsymbol: z.string(),
-  instrument_id: z.string(),
-  xirr: z.number().or(z.literal('NA')).optional(),
-});
-
-type Instrument = z.infer<typeof InstrumentZod>;
+import {
+  GET_XIRR,
+  Instrument,
+  InstrumentZod,
+  XirrRequest,
+  XirrResponse,
+} from '../../common/constants';
 
 export class Holdings {
   holdingsMap: Record<string, Instrument> = {};
-  limit = pLimit(8);
-  xirrFetcher = new Xirr();
 
   constructor() {
     setUpOnHoverFundamentals();
@@ -107,11 +102,21 @@ export class Holdings {
   };
 
   enrichHoldingsWithXirr = async () => {
-    for (const item of Object.values(this.holdingsMap)) {
-      await this.limit(async () => {
-        const xirr = await this.xirrFetcher.fetchXirr(item.instrument_id);
-        item.xirr = xirr === 0 ? 'NA' : xirr;
-      });
+    const token = window.localStorage.getItem('__storejs_kite_public_token');
+    if (token == null) {
+      console.log('console token is null');
+      return;
+    }
+    const res = await chrome.runtime.sendMessage<XirrRequest, XirrResponse>({
+      type: GET_XIRR,
+      holdings: Object.values(this.holdingsMap),
+      token,
+    });
+
+    console.log('res', res);
+    const {xirrs} = res;
+    for (const item of Object.keys(xirrs)) {
+      this.holdingsMap[item].xirr = xirrs[item] === 0 ? 'NA' : xirrs[item];
     }
   };
 

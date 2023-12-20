@@ -1,10 +1,15 @@
-console.log('background is running')
+import {GET_XIRR} from '../common/constants';
+import {handleXirrRequest} from './xirr';
 
-const allResourceTypes = Object.values(chrome.declarativeNetRequest.ResourceType);
+console.log('background is running');
 
-chrome.runtime.onMessage.addListener(request => {
-  if (request.type === 'COUNT') {
-    console.log('background has received a message from popup, and count is: ', request?.count);
+chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+  if (request.type === GET_XIRR) {
+    (async () => {
+      const res = await handleXirrRequest(request);
+      sendResponse(res);
+    })();
+    return true;
   }
 });
 
@@ -56,8 +61,7 @@ chrome.runtime.onInstalled.addListener(() => {
     addRules: [RULE],
   });
 
-  chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(details => {
-    console.log('onRuleMatchedDebug', details);
-  });
-
+  // chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(details => {
+  //   console.log('onRuleMatchedDebug', details);
+  // });
 });
