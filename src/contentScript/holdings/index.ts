@@ -9,10 +9,12 @@ import {
 } from '../../common/constants';
 import {stringToNode} from '../../utils/dom';
 
-const sortAsc = (xirrColIndex: number) => {
+const sortDesc = (xirrColIndex: number) => {
   return (a: Element, b: Element) => {
-    const aXirr = Number(a.children[xirrColIndex].textContent?.trim().replace('%', ''));
-    const bXirr = Number(b.children[xirrColIndex].textContent?.trim().replace('%', ''));
+    const aVal = a.children[xirrColIndex].textContent?.trim().replace('%', '');
+    const bVal = b.children[xirrColIndex].textContent?.trim().replace('%', '');
+    const aXirr = Number(aVal === 'NA' ? -Infinity : aVal);
+    const bXirr = Number(bVal === 'NA' ? -Infinity : bVal);
     if (aXirr > bXirr) {
       return -1;
     }
@@ -23,10 +25,12 @@ const sortAsc = (xirrColIndex: number) => {
   };
 };
 
-const sortDesc = (xirrColIndex: number) => {
+const sortAsc = (xirrColIndex: number) => {
   return (a: Element, b: Element) => {
-    const aXirr = Number(a.children[xirrColIndex].textContent?.trim().replace('%', ''));
-    const bXirr = Number(b.children[xirrColIndex].textContent?.trim().replace('%', ''));
+    const aVal = a.children[xirrColIndex].textContent?.trim().replace('%', '');
+    const bVal = b.children[xirrColIndex].textContent?.trim().replace('%', '');
+    const aXirr = Number(aVal === 'NA' ? Infinity : aVal);
+    const bXirr = Number(bVal === 'NA' ? Infinity : bVal);
     if (aXirr < bXirr) {
       return -1;
     }
