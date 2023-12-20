@@ -9,6 +9,34 @@ import {
 } from '../../common/constants';
 import {stringToNode} from '../../utils/dom';
 
+const sortAsc = (xirrColIndex: number) => {
+  return (a: Element, b: Element) => {
+    const aXirr = Number(a.children[xirrColIndex].textContent?.trim().replace('%', ''));
+    const bXirr = Number(b.children[xirrColIndex].textContent?.trim().replace('%', ''));
+    if (aXirr > bXirr) {
+      return -1;
+    }
+    if (aXirr < bXirr) {
+      return 1;
+    }
+    return 0;
+  };
+};
+
+const sortDesc = (xirrColIndex: number) => {
+  return (a: Element, b: Element) => {
+    const aXirr = Number(a.children[xirrColIndex].textContent?.trim().replace('%', ''));
+    const bXirr = Number(b.children[xirrColIndex].textContent?.trim().replace('%', ''));
+    if (aXirr < bXirr) {
+      return -1;
+    }
+    if (aXirr > bXirr) {
+      return 1;
+    }
+    return 0;
+  };
+};
+
 export class Holdings {
   holdingsMap: Record<string, Instrument> = {};
 
@@ -66,9 +94,55 @@ export class Holdings {
     }
 
     header.insertBefore(
-      stringToNode(`<th class="text-right">XIRR</th>`),
+      stringToNode(`<th class="right sortable"><span>XIRR</span></th>`),
       header.children[xirrColIndex]
     );
+
+    const xirrHeader = header.children[xirrColIndex];
+
+    xirrHeader.addEventListener('click', () => {
+      // Sort by xirr
+      const rows = table.children[1].children;
+      let order = 'asc';
+      if (xirrHeader.classList.contains('sorted') && xirrHeader.classList.contains('asc')) {
+        order = 'desc';
+      }
+
+      const sortedRows = Array.from(rows).sort(
+        order === 'asc' ? sortAsc(xirrColIndex) : sortDesc(xirrColIndex)
+      );
+
+      for (const row of rows) {
+        row.remove();
+      }
+
+      for (const row of sortedRows) {
+        table.children[1].append(row);
+      }
+
+      // Remove sort icon from other columns
+      for (const row of header.children) {
+        row.classList.remove('sorted');
+        row.classList.remove('asc');
+        row.classList.remove('desc');
+      }
+
+      // Add sort icon to xirr column
+      header.children[xirrColIndex].classList.add('sorted');
+      header.children[xirrColIndex].classList.add(order);
+    });
+
+    // Remove sort icon if any other col header is clicked
+    for (const row of header.children) {
+      if (row.textContent?.trim() === 'XIRR') {
+        continue;
+      }
+      row.addEventListener('click', () => {
+        xirrHeader.classList.remove('sorted');
+        xirrHeader.classList.remove('asc');
+        xirrHeader.classList.remove('desc');
+      });
+    }
 
     const rows = table.children[1].children;
     for (const row of rows) {
