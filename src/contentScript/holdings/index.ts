@@ -1,6 +1,7 @@
 import {z} from 'zod';
 import pLimit from 'p-limit';
 import {Xirr} from './xirr';
+import {setUpOnHoverFundamentals} from './hoverFundamentals';
 
 const InstrumentZod = z.object({
   tradingsymbol: z.string(),
@@ -16,7 +17,7 @@ export class Holdings {
   xirrFetcher = new Xirr();
 
   constructor() {
-    this.setUpOnHoverFundamentals();
+    setUpOnHoverFundamentals();
     (async () => {
       const result = await chrome.storage.sync.get(['xirrEnabled']);
       if (result.xirrEnabled === undefined || Boolean(result.xirrEnabled)) {
@@ -51,65 +52,6 @@ export class Holdings {
 
     this.updateXirr();
   }
-
-  setUpOnHoverFundamentals = () => {
-    let activeTicker = '';
-    let hoverFundamentalsEnabled = false;
-    chrome.storage.sync.get(['hoverFundamentalsEnabled'], result => {
-      hoverFundamentalsEnabled = result.hoverFundamentalsEnabled ?? true;
-    });
-    chrome.storage.sync.onChanged.addListener(changes => {
-      if (changes.hoverFundamentalsEnabled) {
-        hoverFundamentalsEnabled = changes.hoverFundamentalsEnabled.newValue;
-      }
-    });
-
-    document.addEventListener('mouseover', async (e: any) => {
-      if (!hoverFundamentalsEnabled) {
-        return;
-      }
-      if (!(e.target.tagName === 'SPAN' || e.target.tagName === 'TD')) {
-        return;
-      }
-      const target = e.target as HTMLElement;
-      const ticker = target.textContent?.trim();
-      // check if context is all caps and alphabetical
-      if (
-        ticker == '' ||
-        ticker == null ||
-        ticker !== ticker.toUpperCase() ||
-        !/^[A-Z]+$/.test(ticker) ||
-        ticker === activeTicker
-      ) {
-        return;
-      }
-      activeTicker = ticker;
-
-      const iframe = document.createElement('iframe');
-      const addIFrame = () => {
-        iframe.src = `https://stocks.tickertape.in/tickers/${ticker}`;
-        iframe.width = '715px';
-        iframe.height = '400px';
-        iframe.style.position = 'fixed';
-        iframe.style.bottom = '0';
-        iframe.style.right = '0';
-        iframe.style.zIndex = '999';
-        iframe.style.border = 'none';
-        iframe.style.background = 'white';
-        iframe.style.boxShadow = '0 0 5px 0px #0000004d';
-
-        document.querySelector('#app')?.append(iframe);
-      };
-
-      const handle = setTimeout(addIFrame, 200);
-
-      target.addEventListener('mouseleave', () => {
-        clearTimeout(handle);
-        activeTicker = '';
-        iframe.remove();
-      });
-    });
-  };
 
   updateXirr = async () => {
     console.log('Updating xirr');
@@ -168,7 +110,7 @@ export class Holdings {
     for (const item of Object.values(this.holdingsMap)) {
       await this.limit(async () => {
         const xirr = await this.xirrFetcher.fetchXirr(item.instrument_id);
-        item.xirr = xirr;
+        item.xirr = xirr === 0 ? 'NA' : xirr;
       });
     }
   };
