@@ -7,6 +7,7 @@ import {
   XirrRequest,
   XirrResponse,
 } from '../../common/constants';
+import {stringToNode} from '../../utils/dom';
 
 export class Holdings {
   holdingsMap: Record<string, Instrument> = {};
@@ -20,7 +21,6 @@ export class Holdings {
       }
       this.setUpLocationChangeListener();
       this.refreshPageData();
-      console.log('location change listener added');
     })();
   }
 
@@ -55,12 +55,21 @@ export class Holdings {
       return;
     }
     const header = table.children[0].children[0];
+    let xirrColIndex = -1;
     for (const row of header.children) {
       if (row.textContent?.trim() === 'XIRR') {
         return;
       }
+      if (row.textContent?.trim() === 'P&L') {
+        xirrColIndex = Array.from(header.children).indexOf(row) + 1;
+      }
     }
-    header.insertAdjacentHTML('beforeend', '<th>XIRR</th>');
+
+    header.insertBefore(
+      stringToNode(`<th class="text-right">XIRR</th>`),
+      header.children[xirrColIndex]
+    );
+
     const rows = table.children[1].children;
     for (const row of rows) {
       const tradingsymbol = row.children[0].textContent?.trim();
@@ -71,19 +80,21 @@ export class Holdings {
       if (instrument == null) {
         continue;
       }
-      row.insertAdjacentHTML(
-        'beforeend',
-        `<td class="net-change ${
-          instrument.xirr != null && instrument.xirr !== 'NA'
-            ? instrument.xirr > 0
-              ? 'text-green'
-              : 'text-red'
-            : ''
-        }"><span>${
-          typeof instrument.xirr === 'number'
-            ? `${instrument.xirr > 0 ? '+' : ''}${instrument.xirr.toFixed(2)}%`
-            : instrument.xirr
-        }</span></td>`
+      row.insertBefore(
+        stringToNode(
+          `<td class="net-change ${
+            instrument.xirr != null && instrument.xirr !== 'NA'
+              ? instrument.xirr > 0
+                ? 'text-green'
+                : 'text-red'
+              : ''
+          }"><span>${
+            typeof instrument.xirr === 'number'
+              ? `${instrument.xirr > 0 ? '+' : ''}${instrument.xirr.toFixed(2)}%`
+              : instrument.xirr
+          }</span></td>`
+        ),
+        row.children[xirrColIndex]
       );
     }
   };
@@ -113,7 +124,6 @@ export class Holdings {
       token,
     });
 
-    console.log('res', res);
     const {xirrs} = res;
     for (const item of Object.keys(xirrs)) {
       this.holdingsMap[item].xirr = xirrs[item] === 0 ? 'NA' : xirrs[item];

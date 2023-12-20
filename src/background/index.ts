@@ -58,6 +58,7 @@ chrome.runtime.onInstalled.addListener(() => {
   };
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: [RULE.id],
+    // @ts-expect-error
     addRules: [RULE],
   });
 

@@ -45,7 +45,5 @@ export const handleXirrRequest = async (request: XirrRequest): Promise<XirrRespo
     })
   );
 
-  console.log('xirrs', xirrs);
-
   return {xirrs};
 };
