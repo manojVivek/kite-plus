@@ -1,5 +1,7 @@
 import {sanitizeTicker} from '../../utils/ticker';
 
+const TICKER_BACKLIST = ['LTP', 'CNC', 'SELL', 'BUY', 'SENSEX'];
+
 export const setUpOnHoverFundamentals = () => {
   let activeTicker = '';
   let hoverFundamentalsEnabled = false;
@@ -18,9 +20,11 @@ export const setUpOnHoverFundamentals = () => {
     }
     if (
       !(e.target.tagName === 'SPAN' || e.target.tagName === 'TD') ||
-      //   e.target.parentElement.classList.contains('sortable') ||
-      //   e.target.classList.contains('sortable') ||
-      e.target.classList.contains('user-id')
+      e.target.classList.contains('user-id') ||
+      e.target.classList.contains('exchange') ||
+      e.target.classList.contains('order-status-label') ||
+      e.target.parentElement.classList.contains('order-status-label') ||
+      e.target.classList.contains('order-status')
     ) {
       return;
     }
@@ -32,7 +36,8 @@ export const setUpOnHoverFundamentals = () => {
       ticker == null ||
       ticker !== ticker.toUpperCase() ||
       !/^[A-Z&\-0-9]+$/.test(ticker) ||
-      ticker === activeTicker
+      ticker === activeTicker ||
+      TICKER_BACKLIST.includes(ticker)
     ) {
       return;
     }

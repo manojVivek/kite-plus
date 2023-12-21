@@ -3,7 +3,7 @@
   "displayName": "Kite Plus",
   "version": "1.0.0",
   "author": "no one",
-  "description": "An extension that adds some cool new features to Kite like XIRR data for your portfolio, stock fundamentals on mouse over, and much more!",
+  "description": "An extension that adds some cool new features to Kite like XIRR data for your portfolio, stock fundamentals on mouse over, etc!",
   "type": "module",
   "license": "MIT",
   "keywords": [

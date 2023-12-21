@@ -7,7 +7,8 @@ export const sanitizeTicker = (ticker: string) => {
     ticker.endsWith('-BT') ||
     ticker.endsWith('-GC') ||
     ticker.endsWith('-IL') ||
-    ticker.endsWith('-IQ')
+    ticker.endsWith('-IQ') ||
+    ticker.endsWith('-ST')
   ) {
     ticker = ticker.slice(0, -3);
   }
