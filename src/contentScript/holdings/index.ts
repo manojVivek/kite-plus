@@ -81,7 +81,6 @@ export class Holdings {
   }
 
   updateXirr = async () => {
-    console.log('Updating xirr');
     const table = document.querySelector('.holdings-table table');
     if (table == null) {
       return;
@@ -154,9 +153,13 @@ export class Holdings {
       if (tradingsymbol == null) {
         continue;
       }
-      const instrument = this.holdingsMap[tradingsymbol];
+      let instrument = this.holdingsMap[tradingsymbol];
       if (instrument == null) {
-        continue;
+        instrument = {
+          tradingsymbol,
+          instrument_id: '',
+          xirr: 'NA',
+        };
       }
       row.insertBefore(
         stringToNode(
@@ -187,13 +190,11 @@ export class Holdings {
       {} as Record<string, Instrument>
     );
     await this.enrichHoldingsWithXirr();
-    console.log('holdingsMap', this.holdingsMap);
   };
 
   enrichHoldingsWithXirr = async () => {
     const token = window.localStorage.getItem('__storejs_kite_public_token');
     if (token == null) {
-      console.log('console token is null');
       return;
     }
     const res = await chrome.runtime.sendMessage<XirrRequest, XirrResponse>({
@@ -211,7 +212,6 @@ export class Holdings {
   fetchPortfolioReport = async (retrying = false): Promise<Instrument[]> => {
     const token = window.localStorage.getItem('__storejs_kite_public_token');
     if (token == null) {
-      console.log('console token is null');
       return [];
     }
     try {

@@ -1,9 +1,9 @@
 {
-  "name": "zerodha-kite-portfolio-xirr",
-  "displayName": "zerodha-kite-portfolio-xirr",
-  "version": "0.0.0",
+  "name": "kite-plus",
+  "displayName": "Kite Plus",
+  "version": "1.0.0",
   "author": "no one",
-  "description": "",
+  "description": "An extension that adds some cool new features to Kite like XIRR data for your portfolio, stock fundamentals on mouse over, and much more!",
   "type": "module",
   "license": "MIT",
   "keywords": [

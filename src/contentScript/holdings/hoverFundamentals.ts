@@ -18,8 +18,8 @@ export const setUpOnHoverFundamentals = () => {
     }
     if (
       !(e.target.tagName === 'SPAN' || e.target.tagName === 'TD') ||
-      e.target.parentElement.classList.contains('sortable') ||
-      e.target.classList.contains('sortable') ||
+      //   e.target.parentElement.classList.contains('sortable') ||
+      //   e.target.classList.contains('sortable') ||
       e.target.classList.contains('user-id')
     ) {
       return;

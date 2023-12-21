@@ -1,8 +1,6 @@
 import {GET_XIRR} from '../common/constants';
 import {handleXirrRequest} from './xirr';
 
-console.log('background is running');
-
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   if (request.type === GET_XIRR) {
     (async () => {
