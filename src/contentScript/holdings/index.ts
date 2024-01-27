@@ -7,7 +7,8 @@ import {
   XirrRequest,
   XirrResponse,
 } from '../../common/constants';
-import {stringToNode} from '../../utils/dom';
+import {onURLChange, stringToNode} from '../../utils/dom';
+import {sleep} from '../../utils/common';
 
 const sortDesc = (xirrColIndex: number) => {
   return (a: Element, b: Element) => {
@@ -57,15 +58,9 @@ export class Holdings {
   }
 
   setUpLocationChangeListener() {
-    // Improve this
-    let lastURL = document.location.href;
-
-    setInterval(() => {
-      if (lastURL !== document.location.href) {
-        this.refreshPageData();
-        lastURL = document.location.href;
-      }
-    }, 1000);
+    onURLChange(() => {
+      this.refreshPageData();
+    });
   }
 
   isHoldingsPage() {
@@ -216,7 +211,7 @@ export class Holdings {
     }
     try {
       const now = new Date();
-      const dateStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+      const dateStr = now.toISOString().split('T')[0];
       const res = await fetch(
         `https://console.zerodha.com/api/reports/holdings/portfolio?date=${dateStr}`,
         {
@@ -250,7 +245,7 @@ export class Holdings {
     iframe.style.display = 'none';
     // Append to start of doc
     document.documentElement.prepend(iframe);
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await sleep(5000);
     iframe.remove();
   };
 }

@@ -1,6 +1,6 @@
 import {sanitizeTicker} from '../../utils/ticker';
 
-const TICKER_BACKLIST = ['LTP', 'CNC', 'SELL', 'BUY', 'SENSEX', 'NA', 'GTT', 'SIP'];
+const TICKER_BACKLIST = ['LTP', 'CNC', 'SELL', 'BUY', 'SENSEX', 'NA', 'GTT', 'SIP', 'P&L'];
 
 export const setUpOnHoverFundamentals = () => {
   let activeTicker = '';
@@ -26,7 +26,9 @@ export const setUpOnHoverFundamentals = () => {
       e.target.parentElement.classList.contains('order-status-label') ||
       e.target.classList.contains('order-status') ||
       e.target.parentElement.classList.contains('sortable') ||
-      e.target.classList.contains('sortable')
+      e.target.classList.contains('sortable') ||
+      e.target.parentElement.classList.contains('quantity') ||
+      e.target.classList.contains('quantity')
     ) {
       return;
     }
