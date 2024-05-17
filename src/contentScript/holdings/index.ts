@@ -76,6 +76,14 @@ export class Holdings {
   }
 
   updateXirr = async () => {
+    // Expand the holdings table if collapsed
+    const expandButton = document.querySelector(
+      'td.show-all-col > a'
+    ) as HTMLTableCellElement | null;
+    if (expandButton != null) {
+      expandButton.click();
+      await sleep(1000);
+    }
     const table = document.querySelector('.holdings-table table');
     if (table == null) {
       return;
