@@ -9,9 +9,16 @@ import {
 } from '../../common/constants';
 import {onURLChange, stringToNode} from '../../utils/dom';
 import {sleep} from '../../utils/common';
+import {sanitizeTicker} from '../../utils/ticker';
 
 const sortDesc = (xirrColIndex: number) => {
   return (a: Element, b: Element) => {
+    if (a.children.length === 1) {
+      return 1;
+    }
+    if (b.children.length === 1) {
+      return -1;
+    }
     const aVal = a.children[xirrColIndex].textContent?.trim().replace('%', '');
     const bVal = b.children[xirrColIndex].textContent?.trim().replace('%', '');
     const aXirr = Number(aVal === 'NA' ? -Infinity : aVal);
@@ -28,6 +35,12 @@ const sortDesc = (xirrColIndex: number) => {
 
 const sortAsc = (xirrColIndex: number) => {
   return (a: Element, b: Element) => {
+    if (a.children.length === 1) {
+      return 1;
+    }
+    if (b.children.length === 1) {
+      return -1;
+    }
     const aVal = a.children[xirrColIndex].textContent?.trim().replace('%', '');
     const bVal = b.children[xirrColIndex].textContent?.trim().replace('%', '');
     const aXirr = Number(aVal === 'NA' ? Infinity : aVal);
@@ -82,7 +95,7 @@ export class Holdings {
     ) as HTMLTableCellElement | null;
     if (expandButton != null) {
       expandButton.click();
-      await sleep(1000);
+      await sleep(500);
     }
     const table = document.querySelector('.holdings-table table');
     if (table == null) {
@@ -152,7 +165,10 @@ export class Holdings {
 
     const rows = table.children[1].children;
     for (const row of rows) {
-      const tradingsymbol = row.children[0].textContent?.trim();
+      const tradingsymbol = row.children[0].children[0].textContent?.trim();
+      if (tradingsymbol == 'Show less rows') {
+        continue;
+      }
       if (tradingsymbol == null) {
         continue;
       }
@@ -160,6 +176,7 @@ export class Holdings {
       if (instrument == null) {
         instrument = {
           tradingsymbol,
+          sanitizedTradingsymbol: tradingsymbol,
           instrument_id: '',
           xirr: 'NA',
         };
@@ -187,7 +204,9 @@ export class Holdings {
     const holdings = z.array(InstrumentZod).parse(data);
     this.holdingsMap = holdings.reduce(
       (acc, item) => {
+        item.sanitizedTradingsymbol = sanitizeTicker(item.tradingsymbol);
         acc[item.tradingsymbol] = item;
+        acc[item.sanitizedTradingsymbol as string] = item;
         return acc;
       },
       {} as Record<string, Instrument>
