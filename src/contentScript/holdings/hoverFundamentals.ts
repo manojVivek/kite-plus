@@ -52,9 +52,9 @@ export const setUpOnHoverFundamentals = () => {
 
     const iframe = document.createElement('iframe');
     const addIFrame = () => {
-      iframe.src = `https://stocks.tickertape.in/tickers/${ticker}`;
-      iframe.width = '715px';
-      iframe.height = '400px';
+      iframe.src = `https://b2b.tijorifinance.com/b2b/v1/in/kite-widget/web/equity/${ticker}/?exchange=BSE&broker=kite&theme=default`;
+      iframe.width = '970px';
+      iframe.height = '565px';
       iframe.style.position = 'fixed';
       iframe.style.bottom = '0';
       iframe.style.right = '0';
